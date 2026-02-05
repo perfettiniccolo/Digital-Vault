@@ -6,3 +6,4 @@ Il Database (MongoDB) e il gestore delle identità (KeyCloak) sono configurati a
 
 2. Configurazione dell'identity Realm. 
 Si stabilisce un rapporto Trust tra il Backend e Keycloak. Keycloak funge da intermediario tra l'utente e l'applicazione backend, quando l'utente vuole accedere alla cassaforte, keycloak ne verifica l'identità e rilascia un JWT (oggetto JSON che contiene generalità e ruoli dell'utente). Queste quindi non rimangono del db di mongo, ma vengono custodite all'interno di keycloak.
+La configurazione del Relam definisce le regole della cassaforte. Si stabilisce che solo i token emessi dall'autorità saranno accettati dal codcie Java. Il client rappresenta l'identità del backend all'interno di keycloak, possiede una private key che userà per validare le richieste. L'identità dell'utente è quindi certa, immutabile e verificabile tramite la firma digitale del token.
