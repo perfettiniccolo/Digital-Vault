@@ -4,44 +4,37 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     //Definisce come devon essere filtrate le richieste web
+    //Definizione delle cose basilari della sicurezza del progetto: Statelss e Resource server
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) //disabilita 403 FORBIDDEN per salvare i dati su mongoBD
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults());
+                //disabilita 403 FORBIDDEN per salvare i dati su mongoBD
+                .csrf(AbstractHttpConfigurer::disable)
+
+                //SESSION STATELESS
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                //RESOURCE SERVER
+                .oauth2ResourceServer(oauth2->
+                        oauth2.jwt(Customizer.withDefaults())
+                );
+
         return http.build();
     }
 
-    @Bean
-    PasswordEncoder getPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
-    @Bean //Utente di prova
-    public InMemoryUserDetailsManager userDetails() {
-        PasswordEncoder passwordEncoder = getPasswordEncoder();
-        String password = "pass";
-        String encodedPassword = passwordEncoder.encode(password);
 
-        UserDetails user = User
-                .withUsername("admin")
-                .password(encodedPassword)
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
 }
