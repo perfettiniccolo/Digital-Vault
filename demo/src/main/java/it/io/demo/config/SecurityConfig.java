@@ -6,10 +6,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,8 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static tools.jackson.databind.type.LogicalType.*;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +32,25 @@ public class SecurityConfig {
                 //disabilita 403 FORBIDDEN per salvare i dati su mongoBD
                 .csrf(AbstractHttpConfigurer::disable)
 
+                //CORS (Sintassi corretta per Spring Security 6)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                //REQUEST MATCHERS (Unico blocco, ordinato dal più specifico al più generico)
+                .authorizeHttpRequests(auth -> auth
+                        // 1. Swagger pubblico
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // 2. Il resto delle API rimane protetto
+                        .requestMatchers("/api/vault/**").authenticated()
+
+                        // 3. Regola finale (chiude tutto il resto)
+                        .anyRequest().authenticated()
+                )
+
                 //SESSION STATELESS
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -43,24 +58,8 @@ public class SecurityConfig {
 
                 //RESOURCE SERVER
                 .oauth2ResourceServer(oauth2->
-                        oauth2.jwt(jwt -> jwtAuthenticationConverter())
-                )
-
-                //REQUEST MATCHERS
-                /*
-                .authorizeHttpRequests(authorize-> authorize
-
-                        //Endpoint pubblici
-                        .requestMatchers()
-
-                        //Endpoint privati con autenticazione
-
-                        //Endpoint protetti con ruoli
-                 */
-
-                //CORS
-                .cors(cors -> corsConfigurationSource());
-
+                        oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                );
         return http.build();
     }
 
@@ -97,13 +96,15 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         //Definizione di chi può chiamarci
-        //configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        // configuration.setAllowedOrigins(Arrays.asList("http://localhost:80"));
 
         //Definizione dei metodi permessi
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         //Permettiamo l'invio del token
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+
+        configuration.addAllowedOriginPattern("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
