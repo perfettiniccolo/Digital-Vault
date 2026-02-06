@@ -16,3 +16,10 @@ La configurazione del Relam definisce le regole della cassaforte. Si stabilisce 
     3. Il backend viene istruito a creare una gerarchia di permessi, con esposizione pubblica, autenticata e autorizzata, con ognuna di queste esposizioni che richiede cose diverse. Pubblica accesso anonimo, autenticato JWT valido e autorizzato JWT + ruoli
     4. Disaccopiamento tra autenticazione e autorizzazione.
     
+5. Reflection core per il motore dell'applicazione backend. Il backend userà le API di Reflection per aprire l'oggetto ricevuto, creandone i campi e le annotazioni per conoscere la classe a priori. 
+Creazione di un generic service, cosi che quando arriva un oggetto al controller, questo usa la Reflection per analizzarlo al buio, senza codice specifico per ogni singola tipologia di dato.
+Processo:
+    1. Estrazione dell'identità, una volta che il Resource Server ha validato il JWT, l'identità dell'utente non risiede più nel pacchetto HTTP, ma nel SecurityContextHolder. Il backend estrare il claim sub. 
+    2. L'oggetto arriva al generic seervice, che userà la reflection per analizzarlo al buio. 
+    3. Il service cerca il posto per inserire l'owner ID del propietari, il backend sovrascrive l'ID dell'utente prima che tocchi il db, impedendo così che un utente possa salvare dati a nome di un altro utente.
+    4. Archiviazione nel repository  del db.
