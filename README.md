@@ -23,3 +23,5 @@ Processo:
     2. L'oggetto arriva al generic seervice, che userà la reflection per analizzarlo al buio. 
     3. Il service cerca il posto per inserire l'owner ID del propietari, il backend sovrascrive l'ID dell'utente prima che tocchi il db, impedendo così che un utente possa salvare dati a nome di un altro utente.
     4. Archiviazione nel repository  del db.
+
+6. Cifratura e Decifratura. Il sensative date verrà decifrato una volta inserito nel db di Mongo, dal momento in cui l'utente autorizzato, solo esclusivamente l'utente autorizzato, vuole accedere al dato decriptato, questo verrà decifrato.
