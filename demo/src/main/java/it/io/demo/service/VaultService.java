@@ -19,7 +19,7 @@ public class VaultService {
 
     //Salvataggio
     public Secret saveSecret(Secret secret){
-        // injectOwnerId(secret);
+        injectOwnerId(secret);
 
         return vaultRepository.save(secret);
     }
@@ -59,3 +59,26 @@ public class VaultService {
         }
     }
 }
+
+/*
+@DeleteMapping
+    public void deleteTask(@RequestBody Task task) {
+        if(!taskRepository.existsById(task.getId())) {
+            throw new ResourceNotFoundException("Task not found");
+        }
+        taskRepository.delete(task);
+    }
+
+    @PutMapping
+    public Task updateTask(String id, @RequestBody Task task) throws IllegalAccessException {
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id " + id));
+
+        existingTask.setDescription(task.getDescription());
+        existingTask.setCompleted(task.isCompleted());
+        existingTask.setTitle(task.getTitle());
+
+        dynamicTaskService.inspectTask(task);
+        return taskRepository.save(existingTask);
+    }
+ */

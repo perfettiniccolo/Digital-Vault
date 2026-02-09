@@ -12,6 +12,7 @@ public class Secret {
     @Id
     private String id;
     private String name;
+    @SensitiveData
     private String value;
     private String category;
     private Boolean to_change;
