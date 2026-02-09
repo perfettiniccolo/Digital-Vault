@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import it.io.demo.utils.SecuirtyUtils;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 @Service
 public class VaultService {
@@ -26,6 +27,14 @@ public class VaultService {
 
     public Secret findById(String id){
         return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
+    }
+
+    public List<Secret> gettAllSecretsByOwnerId(String ownerId){
+        String correntUserId = SecuirtyUtils.getCurrentUserId();
+
+        List<Secret> secrets = vaultRepository.findByOwnerId(correntUserId);
+
+        return secrets;
     }
 
     public void injectOwnerId(Object enityt){
@@ -59,26 +68,3 @@ public class VaultService {
         }
     }
 }
-
-/*
-@DeleteMapping
-    public void deleteTask(@RequestBody Task task) {
-        if(!taskRepository.existsById(task.getId())) {
-            throw new ResourceNotFoundException("Task not found");
-        }
-        taskRepository.delete(task);
-    }
-
-    @PutMapping
-    public Task updateTask(String id, @RequestBody Task task) throws IllegalAccessException {
-        Task existingTask = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id " + id));
-
-        existingTask.setDescription(task.getDescription());
-        existingTask.setCompleted(task.isCompleted());
-        existingTask.setTitle(task.getTitle());
-
-        dynamicTaskService.inspectTask(task);
-        return taskRepository.save(existingTask);
-    }
- */
