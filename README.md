@@ -24,4 +24,14 @@ Processo:
     3. Il service cerca il posto per inserire l'owner ID del propietari, il backend sovrascrive l'ID dell'utente prima che tocchi il db, impedendo così che un utente possa salvare dati a nome di un altro utente.
     4. Archiviazione nel repository  del db.
 
-6. Cifratura e Decifratura. Il sensative date verrà decifrato una volta inserito nel db di Mongo, dal momento in cui l'utente autorizzato, solo esclusivamente l'utente autorizzato, vuole accedere al dato decriptato, questo verrà decifrato.
+6. Cifratura e Decifratura. Il sensative date verrà decifrato una volta inserito nel db di Mongo, dal momento in cui l'utente autorizzato, solo esclusivamente l'utente autorizzato, vuole accedere al dato decriptato, questo verrà decifrato. 
+Si userà MongoDB CSFLE, in quanto sposta la responsabilità dal db all'applicazione, trattando cosi il db come semplice contenitore di dati, non vedendo mai questi chiaramente. 
+La cifratura avviene dentro l'applicazione SpringBoot, prima ancora che i dati partano per la rete. Il server mongoDB non ha la chiave per leggerli.
+Vengono cifrati solo i campi sensibili, mentre si lasciano in chiaro i campi utili per l'organizzazione dei dati. 
+Si usa il sistema della doppia chiave:
+    ° DEK (Data Encryption Key), chiave che viene messa nel db stesso
+    ° CMK (Customer Master Key), è la chiave che chiude la scatola che contiene la DEK. 
+    1) SpringBoot genera una DEK.
+    2) SpringBoot usa la Dek per cifrare.
+    3) SpringBoot usa la Master Key per cifrare la DEK.
+    4) SpringBoot invia a mongo: il valore cifrato + la DEK cifrata.

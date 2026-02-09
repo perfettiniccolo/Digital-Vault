@@ -8,7 +8,7 @@ public class SecuirtyUtils {
     public static String getCurrentUserId(){
         //1) Recupero dell'autenticazione
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("AUTH" + authentication);
+
         //2) Controllo dell'esistenza di un autenticazione o presenza di un Jwt
         if(authentication == null || ! (authentication.getPrincipal() instanceof Jwt)){
             return null;

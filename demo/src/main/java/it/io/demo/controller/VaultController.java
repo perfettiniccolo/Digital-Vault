@@ -43,9 +43,9 @@ public class VaultController {
        return new ResponseEntity<>(secret, HttpStatus.OK);
    }
 
-   @GetMapping("/getAll/{ownerId}")
-    public ResponseEntity<List<Secret>> gettAllSecretsByOwnerId(@PathVariable String ownerId){
-       List<Secret> secrets = vaultService.gettAllSecretsByOwnerId(ownerId);
+   @GetMapping("/getAll")
+    public ResponseEntity<List<Secret>> gettAllSecretsByOwnerId(){
+       List<Secret> secrets = vaultService.gettAllSecretsByOwnerId();
 
        return new ResponseEntity<>(secrets, HttpStatus.OK);
    }

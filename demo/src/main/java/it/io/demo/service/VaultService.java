@@ -29,7 +29,7 @@ public class VaultService {
         return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
     }
 
-    public List<Secret> gettAllSecretsByOwnerId(String ownerId){
+    public List<Secret> gettAllSecretsByOwnerId(){
         String correntUserId = SecuirtyUtils.getCurrentUserId();
 
         List<Secret> secrets = vaultRepository.findByOwnerId(correntUserId);
