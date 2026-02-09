@@ -29,8 +29,10 @@ Si userà MongoDB CSFLE, in quanto sposta la responsabilità dal db all'applicaz
 La cifratura avviene dentro l'applicazione SpringBoot, prima ancora che i dati partano per la rete. Il server mongoDB non ha la chiave per leggerli.
 Vengono cifrati solo i campi sensibili, mentre si lasciano in chiaro i campi utili per l'organizzazione dei dati. 
 Si usa il sistema della doppia chiave:
+
     ° DEK (Data Encryption Key), chiave che viene messa nel db stesso
-    ° CMK (Customer Master Key), è la chiave che chiude la scatola che contiene la DEK. 
+    ° CMK (Customer Master Key), è la chiave che chiude la scatola che contiene la DEK.
+   
     1) SpringBoot genera una DEK.
     2) SpringBoot usa la Dek per cifrare.
     3) SpringBoot usa la Master Key per cifrare la DEK.
