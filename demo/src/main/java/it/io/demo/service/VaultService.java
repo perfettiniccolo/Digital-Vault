@@ -1,6 +1,7 @@
 package it.io.demo.service;
 
 import it.io.demo.annotation.OwnerId;
+import it.io.demo.dto.SecretDTO;
 import it.io.demo.exception.ResourceNotFoundException;
 import it.io.demo.model.Secret;
 import it.io.demo.repository.VaultRepository;
@@ -13,28 +14,46 @@ import java.util.List;
 @Service
 public class VaultService {
     private final VaultRepository vaultRepository;
+    private final MongoCryptoService cryptoService;
 
-    public VaultService(VaultRepository vaultRepository) {
+    public VaultService(VaultRepository vaultRepository, MongoCryptoService mongoCryptoService) {
         this.vaultRepository = vaultRepository;
+        this.cryptoService = mongoCryptoService;
     }
 
     //Salvataggio
-    public Secret saveSecret(Secret secret){
+    public SecretDTO saveSecret(SecretDTO secretDTO){
+        // Conversione SecretDTO -> Secret
+        Secret secret = new Secret();
+        secret.setName(secretDTO.getName());
+        secret.setUsername(secretDTO.getUsername());
+        secret.setCategory(secretDTO.getCategory());
+        secret.setTo_change(secretDTO.getTo_change());
+
         injectOwnerId(secret);
 
-        return vaultRepository.save(secret);
+        secret.setValue(cryptoService.encrypt(secretDTO.getValue()));
+
+        Secret savedSecret = vaultRepository.save(secret);
+
+        return convertToDTO(savedSecret);
     }
 
     public Secret findById(String id){
         return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
     }
 
-    public List<Secret> gettAllSecretsByOwnerId(){
+    public List<SecretDTO> gettAllSecretsByOwnerId(){
         String correntUserId = SecuirtyUtils.getCurrentUserId();
 
         List<Secret> secrets = vaultRepository.findByOwnerId(correntUserId);
+        List<SecretDTO> secretsDTO = new java.util.ArrayList<>(List.of());
 
-        return secrets;
+        for (Secret secret : secrets) {
+            secretsDTO.add(convertToDTO(secret));
+        }
+
+        return secretsDTO;
     }
 
     public void injectOwnerId(Object enityt){
@@ -66,5 +85,19 @@ public class VaultService {
                 }
             }
         }
+    }
+
+    public SecretDTO convertToDTO(Secret secret) {
+        SecretDTO dto = new SecretDTO();
+        dto.setId(secret.getId());
+        dto.setOwnerId(secret.getOwnerId());
+        dto.setName(secret.getName());
+        dto.setUsername(secret.getUsername());
+        dto.setCategory(secret.getCategory());
+        dto.setTo_change(secret.getTo_change());
+
+        // DECIFRAZIONE: Binary -> String
+        dto.setValue(cryptoService.decrypt(secret.getValue()));
+        return dto;
     }
 }

@@ -1,5 +1,6 @@
 package it.io.demo.controller;
 
+import it.io.demo.dto.SecretDTO;
 import it.io.demo.exception.ResourceNotFoundException;
 import it.io.demo.model.Secret;
 import it.io.demo.repository.VaultRepository;
@@ -28,26 +29,25 @@ public class VaultController {
     // ---POST---
 
    @PostMapping
-   public ResponseEntity<Secret> createSecret(@RequestBody Secret secret){
-       Secret savedSecret = vaultService.saveSecret(secret);
-
+   public ResponseEntity<SecretDTO> createSecret(@RequestBody SecretDTO secretDTO){
+        SecretDTO savedSecret = vaultService.saveSecret(secretDTO);
        return new ResponseEntity<>(savedSecret, HttpStatus.CREATED);
    }
 
    // ---GET---
 
    @GetMapping("/{id}")
-    public ResponseEntity<Secret> getSecretById(@PathVariable String id){
+    public ResponseEntity<SecretDTO> getSecretById(@PathVariable String id){
        Secret secret = vaultService.findById(id);
 
-       return new ResponseEntity<>(secret, HttpStatus.OK);
+       return new ResponseEntity<>(vaultService.convertToDTO(secret), HttpStatus.OK);
    }
 
    @GetMapping("/getAll")
-    public ResponseEntity<List<Secret>> gettAllSecretsByOwnerId(){
-       List<Secret> secrets = vaultService.gettAllSecretsByOwnerId();
+    public ResponseEntity<List<SecretDTO>> gettAllSecretsByOwnerId(){
+       List<SecretDTO> secretsDTO = vaultService.gettAllSecretsByOwnerId();
 
-       return new ResponseEntity<>(secrets, HttpStatus.OK);
+       return new ResponseEntity<>(secretsDTO, HttpStatus.OK);
    }
 
    // ---DELETE---
