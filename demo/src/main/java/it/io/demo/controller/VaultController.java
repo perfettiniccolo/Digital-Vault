@@ -29,7 +29,7 @@ public class VaultController {
     // ---POST---
 
    @PostMapping
-   public ResponseEntity<SecretDTO> createSecret(@RequestBody SecretDTO secretDTO){
+   public ResponseEntity<SecretDTO> createSecret(@RequestBody SecretDTO secretDTO) throws IllegalAccessException {
         SecretDTO savedSecret = vaultService.saveSecret(secretDTO);
        return new ResponseEntity<>(savedSecret, HttpStatus.CREATED);
    }
@@ -37,14 +37,14 @@ public class VaultController {
    // ---GET---
 
    @GetMapping("/{id}")
-    public ResponseEntity<SecretDTO> getSecretById(@PathVariable String id){
+    public ResponseEntity<SecretDTO> getSecretById(@PathVariable String id) throws IllegalAccessException {
        Secret secret = vaultService.findById(id);
 
        return new ResponseEntity<>(vaultService.convertToDTO(secret), HttpStatus.OK);
    }
 
    @GetMapping("/getAll")
-    public ResponseEntity<List<SecretDTO>> gettAllSecretsByOwnerId(){
+    public ResponseEntity<List<SecretDTO>> gettAllSecretsByOwnerId() throws IllegalAccessException {
        List<SecretDTO> secretsDTO = vaultService.gettAllSecretsByOwnerId();
 
        return new ResponseEntity<>(secretsDTO, HttpStatus.OK);
@@ -63,6 +63,12 @@ public class VaultController {
    }
 
    // ---PUT---
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SecretDTO> updateSecret(@PathVariable String id, @RequestBody SecretDTO secretDTO) throws IllegalAccessException {
+        SecretDTO secretDTO = vaultService
+    }
+
     @PutMapping
     public ResponseEntity<Secret> updateSecret(@RequestBody Secret secret){
         Secret existingSecret = vaultRepository.findById(secret.getId())

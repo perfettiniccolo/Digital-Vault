@@ -1,6 +1,7 @@
 package it.io.demo.model;
 
 import it.io.demo.annotation.OwnerId;
+import it.io.demo.annotation.SensitiveData;
 import lombok.Data;
 import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
@@ -13,6 +14,7 @@ public class Secret {
     private String id;
     private String name;
     private String username;
+    @SensitiveData
     private Binary value;
     private String category;
     private Boolean to_change;
