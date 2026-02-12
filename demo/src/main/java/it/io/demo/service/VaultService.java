@@ -6,8 +6,12 @@ import it.io.demo.dto.SecretDTO;
 import it.io.demo.exception.ResourceNotFoundException;
 import it.io.demo.model.Secret;
 import it.io.demo.repository.VaultRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import it.io.demo.utils.SecuirtyUtils;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -22,7 +26,11 @@ public class VaultService {
         this.cryptoService = mongoCryptoService;
     }
 
-    //Salvataggio
+    public Secret findById(String id){
+        return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
+    }
+
+    // Salvataggio
     public SecretDTO saveSecret(SecretDTO secretDTO) throws IllegalAccessException {
         // Conversione SecretDTO -> Secret
         Secret secret = convertToEntity(secretDTO);
@@ -33,10 +41,49 @@ public class VaultService {
         return convertToDTO(savedSecret);
     }
 
-    public Secret findById(String id){
-        return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
+    // Eliminazione
+    public void delete(String id){
+        if(!vaultRepository.existsById(id)){
+            throw new ResourceNotFoundException("Secret not found");
+        }
+        vaultRepository.deleteById(id);
     }
 
+    // Modifica
+    public SecretDTO updateSecret(String id, SecretDTO secretDTO){
+        Secret existingSecret = vaultRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Secret not found"));
+
+        try {
+            for (Field dtoField : secretDTO.getClass().getDeclaredFields()) {
+                Field secretField = existingSecret.getClass().getDeclaredField(dtoField.getName());
+
+                dtoField.setAccessible(true);
+                secretField.setAccessible(true);
+
+                Object newValue = dtoField.get(secretDTO);
+
+                if (newValue != null) {
+                    if (!secretField.isAnnotationPresent(SensitiveData.class)) {
+                        if (!secretField.getName().equals("id") && !secretField.getName().equals("ownerId")) {
+                            secretField.set(existingSecret, newValue);
+                        }
+                    }
+                    else {
+                        secretField.set(existingSecret, cryptoService.encrypt(secretDTO.getValue()));
+                    }
+                }
+            }
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException("Errore di accesso ai campi", e);
+        }
+
+        vaultRepository.save(existingSecret);
+
+        return convertToDTO(existingSecret);
+    }
+
+    // Getter
     public List<SecretDTO> gettAllSecretsByOwnerId() throws IllegalAccessException {
         String correntUserId = SecuirtyUtils.getCurrentUserId();
 
@@ -63,11 +110,9 @@ public class VaultService {
         //Tutti i campi della classe
         Field[] fields = clasz.getDeclaredFields();
 
-        //Controllo della presenza del campo @OwnerId
         for(Field field : fields){
             if(field.isAnnotationPresent(OwnerId.class)){
                 try {
-                    //Campi privati accessibli
                     field.setAccessible(true);
 
                     //Campo della classe riempito
@@ -81,6 +126,7 @@ public class VaultService {
         }
     }
 
+    // Convertitori
     public SecretDTO convertToDTO(Secret secret){
         SecretDTO dto = new SecretDTO();
 
@@ -124,6 +170,7 @@ public class VaultService {
             }
         }
 
+        // DECIFRAZIONE: String -> Binary
         secret.setValue(cryptoService.encrypt(secretDTO.getValue()));
         return secret;
     }
