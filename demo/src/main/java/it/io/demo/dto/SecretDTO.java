@@ -11,6 +11,6 @@ public class SecretDTO {
     @SensitiveData
     private String value;
     private String category;
-    private Boolean to_change;
+    private Boolean toChange;
     private String ownerId;
 }

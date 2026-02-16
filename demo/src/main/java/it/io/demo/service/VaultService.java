@@ -26,11 +26,49 @@ public class VaultService {
         this.cryptoService = mongoCryptoService;
     }
 
-    public Secret findById(String id){
-        return vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
+    // ---------Ricerca---------
+    //      ----Getter----
+    public List<SecretDTO> gettAllSecretsByOwnerId() throws IllegalAccessException {
+        String correntUserId = SecuirtyUtils.getCurrentUserId();
+
+        List<Secret> secrets = vaultRepository.findByOwnerId(correntUserId);
+
+        List<SecretDTO> secretsDTO =convertToDtos(secrets);
+
+        return secretsDTO;
     }
 
-    // Salvataggio
+    public SecretDTO findById(String id){
+        Secret secret = vaultRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Secret not found"));
+
+        return convertToDTO(secret);
+    }
+
+    public List<SecretDTO> findByName(String name){
+        List<Secret> secrets = vaultRepository.findByName(name);
+
+        return convertToDtos(secrets);
+    }
+
+    public List<SecretDTO> findByUsername(String username){
+        List<Secret> secrets = vaultRepository.findByUsername(username);
+
+        return convertToDtos(secrets);
+    }
+
+    public List<SecretDTO> findByToChange(Boolean toChange){
+        List<Secret> secrets = vaultRepository.findByToChange(toChange);
+
+        return convertToDtos(secrets);
+    }
+
+    public List<SecretDTO> findByCategory(String category){
+        List<Secret> secrets = vaultRepository.findByCategory(category);
+
+        return convertToDtos(secrets);
+    }
+
+    // ---------Salvataggio---------
     public SecretDTO saveSecret(SecretDTO secretDTO) throws IllegalAccessException {
         // Conversione SecretDTO -> Secret
         Secret secret = convertToEntity(secretDTO);
@@ -41,7 +79,7 @@ public class VaultService {
         return convertToDTO(savedSecret);
     }
 
-    // Eliminazione
+    // ---------Eliminazione---------
     public void delete(String id){
         if(!vaultRepository.existsById(id)){
             throw new ResourceNotFoundException("Secret not found");
@@ -49,7 +87,7 @@ public class VaultService {
         vaultRepository.deleteById(id);
     }
 
-    // Modifica
+    // ---------Modifica---------
     public SecretDTO updateSecret(String id, SecretDTO secretDTO){
         Secret existingSecret = vaultRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Secret not found"));
@@ -83,20 +121,6 @@ public class VaultService {
         return convertToDTO(existingSecret);
     }
 
-    // Getter
-    public List<SecretDTO> gettAllSecretsByOwnerId() throws IllegalAccessException {
-        String correntUserId = SecuirtyUtils.getCurrentUserId();
-
-        List<Secret> secrets = vaultRepository.findByOwnerId(correntUserId);
-        List<SecretDTO> secretsDTO = new java.util.ArrayList<>(List.of());
-
-        for (Secret secret : secrets) {
-            secretsDTO.add(convertToDTO(secret));
-        }
-
-        return secretsDTO;
-    }
-
     public void injectOwnerId(Object enityt){
         String userID = SecuirtyUtils.getCurrentUserId();
 
@@ -126,7 +150,7 @@ public class VaultService {
         }
     }
 
-    // Convertitori
+    // ---------Convertitori---------
     public SecretDTO convertToDTO(Secret secret){
         SecretDTO dto = new SecretDTO();
 
@@ -173,5 +197,15 @@ public class VaultService {
         // DECIFRAZIONE: String -> Binary
         secret.setValue(cryptoService.encrypt(secretDTO.getValue()));
         return secret;
+    }
+
+    public List<SecretDTO> convertToDtos(List<Secret> secrets) {
+        List<SecretDTO> secretsDTO = new java.util.ArrayList<>(List.of());
+
+        for (Secret secret : secrets) {
+            secretsDTO.add(convertToDTO(secret));
+        }
+
+        return secretsDTO;
     }
 }

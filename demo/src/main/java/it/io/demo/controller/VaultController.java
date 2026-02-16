@@ -25,11 +25,11 @@ public class VaultController {
    }
 
    // ---GET---
-   @GetMapping("/{id}")
+   @GetMapping("/getById/{id}")
     public ResponseEntity<SecretDTO> getSecretById(@PathVariable String id) throws IllegalAccessException {
-       Secret secret = vaultService.findById(id);
+       SecretDTO secretDTO = vaultService.findById(id);
 
-       return new ResponseEntity<>(vaultService.convertToDTO(secret), HttpStatus.OK);
+       return new ResponseEntity<>(secretDTO, HttpStatus.OK);
    }
 
    @GetMapping("/getAll")
@@ -37,6 +37,34 @@ public class VaultController {
        List<SecretDTO> secretsDTO = vaultService.gettAllSecretsByOwnerId();
 
        return new ResponseEntity<>(secretsDTO, HttpStatus.OK);
+   }
+
+   @GetMapping("/getByName/{name}")
+   public ResponseEntity<List<SecretDTO>> getSecretByName(@PathVariable String name) throws IllegalAccessException {
+        List<SecretDTO> secretDTO = vaultService.findByName(name);
+
+        return new ResponseEntity<>(secretDTO, HttpStatus.OK);
+   }
+
+   @GetMapping("/getByUsername/{username}")
+   public ResponseEntity<List<SecretDTO>> getSecretByUsername(@PathVariable String username) throws IllegalAccessException {
+        List<SecretDTO> secretDTO = vaultService.findByUsername(username);
+
+        return new ResponseEntity<>(secretDTO, HttpStatus.OK);
+   }
+
+   @GetMapping("/getByToChange/{change}")
+   public ResponseEntity<List<SecretDTO>> getSecretByToChange(@PathVariable Boolean change) throws IllegalAccessException {
+        List<SecretDTO> secretDTO = vaultService.findByToChange(change);
+
+        return new ResponseEntity<>(secretDTO, HttpStatus.OK);
+   }
+
+   @GetMapping("/getByCategory/{category}")
+   public ResponseEntity<List<SecretDTO>> getSecretByCategory(@PathVariable String category) throws IllegalAccessException {
+        List<SecretDTO> secretDTO = vaultService.findByCategory(category);
+
+        return new ResponseEntity<>(secretDTO, HttpStatus.OK);
    }
 
    // ---DELETE---

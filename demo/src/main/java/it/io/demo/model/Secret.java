@@ -17,7 +17,7 @@ public class Secret {
     @SensitiveData
     private Binary value;
     private String category;
-    private Boolean to_change;
+    private Boolean toChange;
 
     @OwnerId
     private String ownerId;

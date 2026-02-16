@@ -1,0 +1,24 @@
+/* src/index.css */
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  /* Assicuriamoci che non ci siano regole strane di display */
+  display: block;
+}
+
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /* Vite di default mette text-align: center, noi lo vogliamo a sinistra */
+  text-align: left;
+}
